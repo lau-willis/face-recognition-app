@@ -88,7 +88,7 @@ class App extends Component {
     this.state = {
       input: '',
       imageUrl: '',
-      box: {},
+      box: [],
     }
     this.onInputChange = this.onInputChange.bind(this);
     this.onButtonSubmit = this.onButtonSubmit.bind(this);
@@ -96,20 +96,29 @@ class App extends Component {
 
 
   calculateFaceLocation(data){
-    const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
+    //const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
+    const clarifaiFace = data.outputs[0].data.regions.map(region => {
+      return region.region_info.bounding_box;
+    })
     const image = document.getElementById('inputImage');
     const width = Number(image.width);
     const height = Number(image.height);
-    return {
-      leftCol: clarifaiFace.left_col * width,
-      topRow: clarifaiFace.top_row * height,
-      rightCol: width - (clarifaiFace.right_col * width),
-      bottomRow: height - (clarifaiFace.bottom_row * height)
+    for(var i = 0; i < clarifaiFace.length; i++){
+      clarifaiFace[i].top_row *= height;
+      clarifaiFace[i].left_col *= width;
+      clarifaiFace[i].bottom_row = height - (clarifaiFace[i].bottom_row * height);
+      clarifaiFace[i].right_col = width - (clarifaiFace[i].right_col * width);
     }
+    return clarifaiFace;
+    // return {
+    //   leftCol: clarifaiFace.left_col * width,
+    //   topRow: clarifaiFace.top_row * height,
+    //   rightCol: width - (clarifaiFace.right_col * width),
+    //   bottomRow: height - (clarifaiFace.bottom_row * height)
+    // }
   }
 
   displayFaceBox(box){
-    console.log(box);
     this.setState({box})
   }
 
